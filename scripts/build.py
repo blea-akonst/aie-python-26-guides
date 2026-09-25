@@ -25,8 +25,7 @@ KINDS = {
     "after": '<span class="tag">После</span>',
 }
 FORMATTER = HtmlFormatter(nowrap=True)
-INDEX_LEAD = ("Шпаргалки к лабам: что проверяют автотесты "
-              "и как к ним готовиться.")
+CODES = r'<span class="codes">(?:<span[^>]*>[^<]*</span>)*</span>'
 
 BURGER = (
     '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">'
@@ -129,7 +128,7 @@ def render_body(body):
                         for c in match.group(1).split(", "))
         return f'<span class="codes">{pills}</span>'
 
-    rendered = re.sub(r"\s\(((?:[EWF]\d{3})(?:, [EWF]\d{3})*)\)(?=</h4>)",
+    rendered = re.sub(r"\s\(((?:[EWF]\d{3})(?:, [EWF]\d{3})*)\)(?=</h3>)",
                       badges, rendered)
     rendered = rendered.replace("<table>", '<div class="table reveal"><table>')
     return rendered.replace("</table>", "</table></div>")
@@ -153,8 +152,9 @@ def split_sections(rendered):
             + (f'<p class="eyebrow">{eyebrow}</p>' if eyebrow else "")
             + f'<h2 id="{sid}">{heading}</h2></header>{rest}</section>'
         )
-        toc.append((sid, eyebrow, heading,
-                    re.findall(r'<h3 id="([^"]+)">(.*?)</h3>', rest)))
+        subs = [(s, re.sub(CODES, "", t).strip()) for s, t in
+                re.findall(r'<h3 id="([^"]+)">(.*?)</h3>', rest)]
+        toc.append((sid, eyebrow, heading, subs))
     return "".join(sections), toc
 
 
@@ -198,7 +198,7 @@ def build_guide(path):
     course = course.group(1) if course else ""
     lead_text = re.sub(r"^Курс «[^»]+»\.\s*", "", lead)
     lead_html = markdown.markdown(lead_text).replace(
-        "<p>", '<p class="lead">', 1)
+        "<p>", '<p class="lead">', 1) if lead_text else ""
     sections, toc = split_sections(render_body(body))
     nav = toc_list(toc)
     burger = ('<button class="burger" type="button" popovertarget="drawer" '
@@ -233,10 +233,10 @@ def build_guide(path):
     short = title.split(":")[0].strip()
     target = OUT / path.stem / "index.html"
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(page(short, plain(lead_text), "../", content),
+    description = plain(lead_text) or plain(title)
+    target.write_text(page(short, description, "../", content),
                       encoding="utf-8")
-    return {"slug": path.stem, "title": short, "lead": plain(lead_text),
-            "course": course}
+    return {"slug": path.stem, "title": plain(title), "course": course}
 
 
 def build_index(guides):
@@ -244,7 +244,6 @@ def build_index(guides):
     items = "".join(
         f'<li><a class="guide-link" href="{g["slug"]}/">'
         f'<span class="guide-title">{html.escape(g["title"])}</span>'
-        f'<span class="guide-lead">{html.escape(g["lead"])}</span>'
         f'<span class="guide-go">{ARROW}</span></a></li>'
         for g in guides
     )
@@ -253,7 +252,6 @@ def build_index(guides):
 <header class="hero">
 <p class="eyebrow">{course}</p>
 <h1>Гайды к курсу</h1>
-<p class="lead">{INDEX_LEAD}</p>
 </header>
 <ul class="guides">{items}</ul>
 </main>

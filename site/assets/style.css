@@ -337,28 +337,29 @@ h1 {
 .part { padding: 72px 0 24px; border-top: 1px solid var(--border); }
 .part:first-of-type { border-top: 0; }
 
-.section-head { margin-bottom: 8px; }
+.section-head { margin-bottom: 20px; }
+.hero + .part { padding-top: 16px; }
 .section-head .eyebrow { margin-bottom: 10px; }
 
 h2 {
   margin: 0;
-  font-size: clamp(30px, 4.4vw, 42px);
+  font-size: clamp(28px, 3.8vw, 36px);
   line-height: 1.1;
   letter-spacing: -0.03em;
 }
 
 h3 {
-  margin: 56px 0 12px;
-  font-size: 25px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 48px 0 12px;
+  font-size: 22px;
   line-height: 1.25;
   letter-spacing: -0.02em;
 }
 
 h4 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
   margin: 40px 0 10px;
   font-size: 18px;
   line-height: 1.35;
@@ -390,7 +391,7 @@ a:hover { text-decoration-color: currentColor; }
   overflow-wrap: anywhere;
 }
 
-h4 code { font-size: 0.9em; }
+h3 code, h4 code { font-size: 0.9em; }
 
 .code {
   margin: 12px 0 20px;
@@ -516,15 +517,13 @@ tr:last-child td { border-bottom: 0; }
 
 .guide-link {
   position: relative;
-  display: grid;
-  gap: 6px;
-  padding: 28px 48px 28px 0;
+  display: block;
+  padding: 24px 48px 24px 0;
   color: var(--text);
   text-decoration: none;
 }
 
 .guide-title { font-size: 24px; font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; color: var(--strong); }
-.guide-lead { color: var(--muted); }
 
 .guide-go {
   position: absolute;
