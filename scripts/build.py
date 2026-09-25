@@ -25,12 +25,19 @@ KINDS = {
     "after": '<span class="tag">После</span>',
 }
 FORMATTER = HtmlFormatter(nowrap=True)
+INDEX_TITLE = "Гайды к курсу"
 CODES = r'<span class="codes">(?:<span[^>]*>[^<]*</span>)*</span>'
 
 BURGER = (
     '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">'
     '<path d="M3 5.5h14M3 10h14M3 14.5h14" fill="none" stroke="currentColor" '
     'stroke-width="1.75" stroke-linecap="round"/></svg>'
+)
+CHEVRON = (
+    '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">'
+    '<path d="m6 3.5 4.5 4.5L6 12.5" fill="none" stroke="currentColor" '
+    'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>'
+    '</svg>'
 )
 CROSS = (
     '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">'
@@ -201,6 +208,14 @@ def build_guide(path):
         "<p>", '<p class="lead">', 1) if lead_text else ""
     sections, toc = split_sections(render_body(body))
     nav = toc_list(toc)
+    short = title.split(":")[0].strip()
+    crumbs = (
+        '<nav class="crumbs" aria-label="Навигация по сайту"><ol>'
+        f'<li><a href="../">{INDEX_TITLE}</a>'
+        f'<span class="crumbs-sep">{CHEVRON}</span></li>'
+        f'<li><span aria-current="page">{short}</span></li>'
+        '</ol></nav>'
+    )
     burger = ('<button class="burger" type="button" popovertarget="drawer" '
               f'aria-label="Открыть содержание">{BURGER}</button>')
     close = ('<button class="drawer-close" type="button" '
@@ -223,14 +238,13 @@ def build_guide(path):
 </aside>
 <main>
 <header class="hero">
-<p class="eyebrow"><a href="../">{course}</a></p>
+{crumbs}
 <h1>{title}</h1>
 {lead_html}
 </header>
 {sections}
 </main>
 </div>"""
-    short = title.split(":")[0].strip()
     target = OUT / path.stem / "index.html"
     target.parent.mkdir(parents=True, exist_ok=True)
     description = plain(lead_text) or plain(title)
@@ -251,13 +265,13 @@ def build_index(guides):
 <main>
 <header class="hero">
 <p class="eyebrow">{course}</p>
-<h1>Гайды к курсу</h1>
+<h1>{INDEX_TITLE}</h1>
 </header>
 <ul class="guides">{items}</ul>
 </main>
 </div>"""
     (OUT / "index.html").write_text(
-        page("Гайды к курсу", f"Шпаргалки к лабам курса «{course}»", "",
+        page(INDEX_TITLE, f"Шпаргалки к лабам курса «{course}»", "",
              content, script=False),
         encoding="utf-8",
     )
